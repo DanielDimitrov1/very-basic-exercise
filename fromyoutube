@@ -27,8 +27,8 @@ resource "aws_route_table" "dani-route-table" {
   }
 
   route {
-    ipv6_cidr_block        = "::/0"
-    gateway_id = aws_internet_gateway.gw.id
+    ipv6_cidr_block = "::/0"
+    gateway_id      = aws_internet_gateway.gw.id
   }
 
   tags = {
@@ -39,7 +39,7 @@ resource "aws_route_table" "dani-route-table" {
 resource "aws_subnet" "subnet-1" {
   vpc_id = aws_vpc.dani.id
   cidr_block = "10.0.1.0/24"
-  availability = "eu-centarl-1a"
+  availability_zone = "eu-central-1a"
 
   tags = {
     Name = "daniel-subnet"
@@ -65,7 +65,6 @@ resource "aws_security_group" "allow_web" {
     protocol         = "tcp"
     cidr_blocks      = ["0.0.0.0/0"] #which address can access this subnet, it is not safe, but for this purpose now it is ok
   }
-
   ingress {
     description      = "HTTP"
     from_port        = 80
@@ -73,14 +72,13 @@ resource "aws_security_group" "allow_web" {
     protocol         = "tcp"
     cidr_blocks      = ["0.0.0.0/0"]
   }
-
   ingress {
     description      = "SSH"
     from_port        = 22 
     to_port          = 22
     protocol         = "tcp"
     cidr_blocks      = ["0.0.0.0/0"]
-
+  }
   egress {
     from_port        = 0
     to_port          = 0
@@ -93,6 +91,7 @@ resource "aws_security_group" "allow_web" {
     Name = "allow_web"
   }
 }
+
 # 7. Create a network interface with an ip in the subnet that was created in step 4
 resource "aws_network_interface" "web-server-dani" {
   subnet_id       = aws_subnet.subnet-1.id
@@ -109,14 +108,14 @@ resource "aws_eip" "one" {
   vpc                       = true
   network_interface         = aws_network_interface.web-server-dani.id
   associate_with_private_ip = "10.0.1.50"
-  depends_on = [aws_internet_gateway.gw] #we don't use ID beacuse we like to address the whole object not just the id
+  depends_on                = [aws_internet_gateway.gw] #we don't use ID beacuse we like to address the whole object not just the id
 }
 # 9. Create ubuntu server and instal apache2
 
-resource "aws_instance" "dani-instance" {
-  ami = "ami-0ee23bfc74a881de5"
+resource "aws_instance" "dani" {
+  ami = "ami-08c40ec9ead489470"
   instance_type = "t2.micro"
-  availability = "eu-centarl-1a"
+  availability_zone = "eu-central-1a"
   key_name = "acb"
 
   network_interface {
@@ -130,8 +129,7 @@ resource "aws_instance" "dani-instance" {
               sudo systemctl start apache2
               sudo bash -c 'echo your very first web server > /var/www/html/index.html'
               EOF
-    tags {
-      Name = "web-server"
-    }
-            
+  tags = {
+    Name = "web-server"
+  }           
 }
