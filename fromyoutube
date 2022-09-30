@@ -1,8 +1,7 @@
 provider "aws" {
-  region = "eu-central-1"
-  access_key = "AKIAWOPBDWIT45H3IMFL"
-  secret_key = "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"
-  
+  region     = "eu-central-1"
+  access_key = "AKIAWOPBDWITTXSEB65S"
+  secret_key = "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" 
 }
 # 1. Create VPC
 resource "aws_vpc" "dani" {
@@ -11,7 +10,6 @@ resource "aws_vpc" "dani" {
     Name = "daniel"
   }
 }
-
 # 2. Create Internet Gateway
 resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.dani.id
@@ -111,25 +109,16 @@ resource "aws_eip" "one" {
   depends_on                = [aws_internet_gateway.gw] #we don't use ID beacuse we like to address the whole object not just the id
 }
 # 9. Create ubuntu server and instal apache2
-
-resource "aws_instance" "dani" {
-  ami = "ami-08c40ec9ead489470"
-  instance_type = "t2.micro"
+ 
+resource "aws_instance" "name" {
+  ami               = "ami-02d63d6d135e3f0f0"
+  # ami               = data.aws_ami.amazon_linux.id
+  instance_type     = "t2.micro"
   availability_zone = "eu-central-1a"
-  key_name = "acb"
+  key_name          = "dan"
 
-  network_interface {
+network_interface  {
     device_index = 0
     network_interface_id = aws_network_interface.web-server-dani.id
   }
-    user_data = <<-EOF
-              #!/bin/bash
-              sudo apt update -y
-              sudo apt install apache2 -y
-              sudo systemctl start apache2
-              sudo bash -c 'echo your very first web server > /var/www/html/index.html'
-              EOF
-  tags = {
-    Name = "web-server"
-  }           
 }
