@@ -1,7 +1,5 @@
 provider "aws" {
   region     = "eu-central-1"
-  access_key = "AKIAWOPBDWITTXSEB65S"
-  secret_key = "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" 
 }
 # 1. Create VPC
 resource "aws_vpc" "dani" {
